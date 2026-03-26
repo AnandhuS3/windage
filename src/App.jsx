@@ -17,7 +17,7 @@ const Navbar = () => {
     <nav className="absolute w-full z-50 top-0 left-0 bg-transparent pointer-events-none">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between pointer-events-auto">
         <div className="flex items-center space-x-3 cursor-pointer" onClick={(e) => handleNavClick(e, '#top')}>
-          <Camera className="text-[#E31B23]" size={32} />
+          <img src="/favicon.svg" alt="WindAge Logo" className="w-8 h-8" />
           <span className="text-xl font-black tracking-widest text-[#f5f5f5]">WINDAGE</span>
         </div>
         <div className="hidden md:flex space-x-8 text-sm font-medium tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
