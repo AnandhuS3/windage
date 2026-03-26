@@ -2,6 +2,212 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence, useMotionValueEvent, useSpring } from 'framer-motion';
 import { Camera, Battery, Wind, Mic, Clock, Cpu } from 'lucide-react';
 
+// Apple-style scroll-driven camera parts annotation
+const EcosystemSection = () => {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  });
+  const smooth = useSpring(scrollYProgress, { stiffness: 60, damping: 25 });
+
+  // 5 parts — each gets its own scroll window [start, peak, end]
+  const parts = [
+    {
+      id: 'oar',
+      label: 'OAR POD',
+      sub: 'Top-mount multi-controller. Seamless operational command, always at hand.',
+      // SVG line: from dot on image to label box — % coords relative to image wrapper
+      dot:   { x: '61%', y: '10%' },
+      line:  { x1: '61%', y1: '10%', x2: '82%', y2: '6%' },
+      anchor: 'right',
+      labelPos: { left: 'auto', right: '0%', top: '2%' },
+      window: [0, 0.15, 0.28],
+    },
+    {
+      id: 'lens',
+      label: 'Cinema Lens Assembly',
+      sub: 'Nine-element precision optics. Razor-sharp across the full 7K open gate.',
+      dot:   { x: '18%', y: '48%' },
+      line:  { x1: '18%', y1: '48%', x2: '2%', y2: '36%' },
+      anchor: 'left',
+      labelPos: { left: '0%', right: 'auto', top: '30%' },
+      window: [0.18, 0.33, 0.46],
+    },
+    {
+      id: 'pcb',
+      label: 'DIGIC X Processor',
+      sub: 'Dual-chip image pipeline. 7K RAW processed in real-time, losslessly.',
+      dot:   { x: '78%', y: '44%' },
+      line:  { x1: '78%', y1: '44%', x2: '96%', y2: '36%' },
+      anchor: 'right',
+      labelPos: { left: 'auto', right: '0%', top: '28%' },
+      window: [0.36, 0.51, 0.64],
+    },
+    {
+      id: 'mount',
+      label: 'RF / PL Lens Mount',
+      sub: 'Reinforced cinema-lock bayonet. Interchangeable RF and PL in seconds.',
+      dot:   { x: '56%', y: '52%' },
+      line:  { x1: '56%', y1: '52%', x2: '2%', y2: '64%' },
+      anchor: 'left',
+      labelPos: { left: '0%', right: 'auto', top: '58%' },
+      window: [0.54, 0.69, 0.82],
+    },
+    {
+      id: 'base',
+      label: 'Base Plate & Rod Rail',
+      sub: '15mm rod-standard base. Lock any rig, shoulder mount, or gimbal instantly.',
+      dot:   { x: '55%', y: '82%' },
+      line:  { x1: '55%', y1: '82%', x2: '82%', y2: '90%' },
+      anchor: 'right',
+      labelPos: { left: 'auto', right: '0%', top: '82%' },
+      window: [0.72, 0.87, 1],
+    },
+  ];
+
+  return (
+    <section
+      id="ecosystem"
+      ref={containerRef}
+      className="relative bg-[#050505] border-t border-[#1a1a1a]"
+      style={{ height: '550vh' }}
+    >
+      {/* Ambient background glows */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], opacity: [0.08, 0.22, 0.08], rotate: [0, 90, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+          className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-[#E31B23] blur-[140px] rounded-full"
+        />
+        <motion.div
+          animate={{ scale: [1, 1.6, 1], opacity: [0.04, 0.14, 0.04], x: [0, 80, 0], y: [0, 60, 0] }}
+          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-[#ff2a35] blur-[180px] rounded-full"
+        />
+      </div>
+
+      {/* Sticky viewport */}
+      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden z-10">
+        {/* Section header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-8 px-6"
+        >
+          <h2 className="text-4xl md:text-6xl font-bold mb-3">
+            Professional <span className="text-[#E31B23]">Ecosystem</span>
+          </h2>
+          <p className="text-lg text-gray-400">A completely modular design engineered for the reality of set life.</p>
+        </motion.div>
+
+        {/* Image + annotation canvas */}
+        <div className="relative w-full max-w-5xl mx-auto px-6" style={{ aspectRatio: '16/9' }}>
+
+          {/* Camera image */}
+          <motion.img
+            src="/assets/images/camera_parts.png"
+            alt="Modular Camera Parts"
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{ mixBlendMode: 'screen' }}
+            animate={{ y: [-6, 6, -6] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+
+          {/* SVG overlay for lines */}
+          <svg
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            style={{ pointerEvents: 'none' }}
+          >
+            {parts.map((part) => (
+              <PartLine key={part.id} part={part} smooth={smooth} />
+            ))}
+          </svg>
+
+          {/* Label callouts */}
+          {parts.map((part) => (
+            <PartLabel key={part.id} part={part} smooth={smooth} />
+          ))}
+
+          {/* Dot markers */}
+          {parts.map((part) => (
+            <PartDot key={part.id} part={part} smooth={smooth} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const PartLine = ({ part, smooth }) => {
+  const opacity = useTransform(smooth, part.window, [0, 1, 1]);
+  const pathLength = useTransform(smooth, part.window, [0, 1, 1]);
+  // Convert % string to number for SVG
+  const x1 = parseFloat(part.line.x1);
+  const y1 = parseFloat(part.line.y1);
+  const x2 = parseFloat(part.line.x2);
+  const y2 = parseFloat(part.line.y2);
+  return (
+    <motion.line
+      x1={x1} y1={y1} x2={x2} y2={y2}
+      stroke="#E31B23"
+      strokeWidth="0.25"
+      strokeLinecap="round"
+      style={{ opacity, pathLength }}
+      vectorEffect="non-scaling-stroke"
+    />
+  );
+};
+
+const PartDot = ({ part, smooth }) => {
+  const opacity = useTransform(smooth, part.window, [0, 1, 1]);
+  const scale = useTransform(smooth, part.window, [0, 1, 1]);
+  return (
+    <motion.div
+      className="absolute w-3 h-3 rounded-full bg-[#E31B23] border-2 border-white shadow-[0_0_12px_rgba(227,27,35,0.9)]"
+      style={{
+        left: part.dot.x,
+        top: part.dot.y,
+        transform: 'translate(-50%, -50%)',
+        opacity,
+        scale,
+      }}
+    />
+  );
+};
+
+const PartLabel = ({ part, smooth }) => {
+  const opacity = useTransform(smooth, part.window, [0, 1, 1]);
+  const x = useTransform(
+    smooth,
+    part.window,
+    part.anchor === 'left' ? [-24, 0, 0] : [24, 0, 0]
+  );
+  return (
+    <motion.div
+      className="absolute w-52"
+      style={{
+        ...part.labelPos,
+        opacity,
+        x,
+      }}
+    >
+      <div
+        className={`bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.6)] ${
+          part.anchor === 'right' ? 'text-right' : 'text-left'
+        }`}
+      >
+        <div className="text-[#E31B23] font-mono text-[10px] tracking-widest uppercase mb-1">Module</div>
+        <div className="text-white font-bold text-sm leading-tight mb-1">{part.label}</div>
+        <div className="text-gray-400 text-xs leading-relaxed">{part.sub}</div>
+      </div>
+    </motion.div>
+  );
+};
+
 const Navbar = () => {
   const handleNavClick = (e, targetId) => {
     e.preventDefault();
@@ -244,121 +450,8 @@ function App() {
         </div>
       </section>
 
-      {/* SECTION 3: MODULAR ECOSYSTEM (Exploded View) */}
-      <section id="ecosystem" className="py-32 bg-[#050505] relative border-t border-[#1a1a1a] overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 z-0 opacity-50">
-          <motion.div 
-            animate={{ 
-              scale: [1, 1.2, 1],
-              opacity: [0.1, 0.3, 0.1],
-              rotate: [0, 90, 0]
-            }}
-            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-            className="absolute -top-40 -right-40 w-96 h-96 bg-[#E31B23] blur-[100px] rounded-full"
-          />
-          <motion.div 
-            animate={{ 
-              scale: [1, 1.5, 1],
-              opacity: [0.05, 0.2, 0.05],
-              x: [0, 100, 0],
-              y: [0, 50, 0]
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#ff2a35] blur-[150px] rounded-full"
-          />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-6xl font-bold mb-4">Professional <span className="text-[#E31B23]">Ecosystem</span></h2>
-            <p className="text-xl text-gray-400">A completely modular design engineered for the reality of set life.</p>
-          </motion.div>
-
-          {/* Elevated Interactive Container */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative w-full max-w-5xl mx-auto aspect-square md:aspect-video rounded-[40px] border border-[#ff2a35]/20 shadow-[0_30px_80px_rgba(227,27,35,0.15)] overflow-hidden flex items-center justify-center p-8 group"
-          >
-            {/* Animated Red Gradient Backdrop */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#2a0505] via-[#E31B23]/20 to-[#050505] z-0"></div>
-            <motion.div 
-              animate={{ backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'] }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_center,rgba(227,27,35,0.4)_0%,transparent_70%)] bg-[length:200%_200%] z-0"
-            />
-
-            {/* Background Graphic */}
-            <motion.img 
-              animate={{ y: [-10, 10, -10] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              src="/assets/images/camera_parts.png" 
-              alt="Modular Camera Parts" 
-              className="absolute inset-0 w-full h-full object-contain p-8 drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)] z-10 scale-105"
-            />
-
-            {/* Hotspots */}
-            {modules.map((mod) => (
-              <div 
-                key={mod.id}
-                className="absolute z-20 group/marker"
-                style={{ left: mod.x, top: mod.y, transform: 'translate(-50%, -50%)' }}
-              >
-                <div className="relative">
-                  {/* Subtle pulse behind hotspot */}
-                  <div className="absolute inset-0 bg-[#E31B23] rounded-full animate-ping opacity-30 duration-1000" />
-                  <button 
-                    onMouseEnter={() => setActiveModule(mod.id)}
-                    onMouseLeave={() => setActiveModule(null)}
-                    className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300
-                      ${activeModule === mod.id 
-                        ? 'bg-[#E31B23] text-white shadow-[0_0_40px_rgba(227,27,35,1)] scale-110 border-2 border-white' 
-                        : 'bg-black/60 backdrop-blur-md border border-white/40 text-white hover:border-[#E31B23] hover:bg-[#E31B23]/40 hover:scale-125 hover:shadow-[0_0_30px_rgba(227,27,35,0.8)] shadow-2xl cursor-pointer'
-                      }
-                    `}
-                  >
-                    {mod.icon}
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* Overlay Panel for Active Module */}
-            <AnimatePresence mode="wait">
-              {activeModule && (
-                <motion.div 
-                  key={activeModule}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  className="absolute bottom-6 left-6 right-6 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md bg-black/80 backdrop-blur-2xl border border-[#E31B23]/30 p-6 rounded-2xl z-30 shadow-[0_20px_50px_rgba(227,27,35,0.2)] pointer-events-none"
-                >
-                  {(() => {
-                    const mod = modules.find(m => m.id === activeModule);
-                    return (
-                      <>
-                        <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
-                          <span className="text-[#E31B23] bg-[#E31B23]/10 p-2 rounded-xl border border-[#E31B23]/20">{mod.icon}</span> {mod.title}
-                        </h3>
-                        <p className="text-gray-300 leading-relaxed text-sm md:text-base">{mod.desc}</p>
-                      </>
-                    )
-                  })()}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </div>
-      </section>
+      {/* SECTION 3: MODULAR ECOSYSTEM — Apple-style scroll annotations */}
+      <EcosystemSection />
 
       {/* SECTION 4: TECHNICAL SPECS TABLE */}
       <section id="tech-specs" className="py-32 px-6">
