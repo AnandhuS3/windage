@@ -1,4 +1,4 @@
-                                                      # WindAge 
+# WindAge 
 
 A high-performance, dark-themed cinematic landing page for **WindAge**, a fictional professional cinema camera system. Built with React, Vite, Framer Motion, and Tailwind CSS.
 
