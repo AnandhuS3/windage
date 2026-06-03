@@ -78,4 +78,4 @@ animated landing page/
 
 ## 📄 License
 
-© 2026 WindAge Cinematic Systems. All rights reserved.
+© 2026 WindAge Cinematic Systems.
